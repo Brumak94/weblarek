@@ -58,7 +58,7 @@ console.log('Данные покупателя (частично):', buyer.getDa
 // Заполнение остальных данных
 buyer.setData({
   address: 'Spb Vosstania 1',
-  payment: 'online'
+  payment: 'card'
 });
 
 console.log('Данные покупателя (полностью):', buyer.getData());

@@ -98,221 +98,86 @@ Presenter - презентер содержит основную логику п
 `emit<T extends object>(event: string, data?: T): void` - инициализация события. При вызове события в метод передается название события и объект с данными, который будет использован как аргумент для вызова обработчика.  
 `trigger<T extends object>(event: string, context?: Partial<T>): (data: T) => void` - возвращает функцию, при вызове которой инициализируется требуемое в параметрах событие с передачей в него данных из второго параметра.
 
-#### Данные
+### Данные
 В данном разделе описаны интерфейсы данных и их назначение.
 
 Интерфейсы:
 
-Интерфейс карточки с товаром нужен для учета товаров, которые будут использоваться в приложении.
+`export interface IApi` - Описывает контракт для класса, который будет работать с API
 
-export interface IProduct {
-  id: string;           // Уникальный идентификатор
-  description: string;  // Подробное описание товара
-  image: string;        // URL изображения
-  title: string;        // Название товара
-  category: string;     // Категория для фильтрации
-  price: number | null; // Цена (может быть null если нет в наличии)
-}
+`export interface IProduct` - Интерфейс для описания карточки с товаром, которые будут использоваться в приложении.
 
-Интерфейс покупателя необходим для ввода данных при оформлении заказа товара.
+`export interface IBuyer` - Интерфейс покупателя необходим для ввода данных при оформлении заказа товара.
 
-export interface IBuyer {
-  payment: TPayment; //Способ оплаты
-  email: string;   //Почта покупателя 
-  phone: string;   //Номер телефона покупателя 
-  address: string; //Адрес доставки покупателя
-}
+`export interface IOrder` - Интерфейс для данных заказа, которые отправляются на сервер 
 
-Тип для заказа (для API)
-export interface IOrder {
-  payment: TPayment;
-  email: string;
-  phone: string;
-  address: string;
-  total: number;
-  items: string[];
-}
+`export interface IOrderResult` - Интерфейс для ответа сервера при успешном оформлении заказа
 
-Ответ от API при успешном заказе
-export interface IOrderResult {
-  id: string;
-  total: number;
-}
+`export interface IProductsResponse` - Интерфейс для ответа сервера при запросе списка товаров
 
-Тип для оплаты
+Типы:
 
-export type TPayment = 'card' | 'cash' | '';
+`export type TPayment = 'card' | 'cash' | ''` - Тип для оплаты
 
-Тип для ошибок валидации
+`export type ValidationErrors = Partial<Record<keyof IBuyer, string>>` - Тип для ошибок валидации
 
-export type ValidationErrors = Partial<Record<keyof IBuyer, string>>;
-
-#### Модель данных
+### Модель данных
 В данном разделе описаны классы и их методы реализации интерфейсов
 
-Объявление класса для управления корзиной для покупок
-export class Cart {
-  private items: IProduct[];
+#### Класс Cart
+Управляет корзиной покупок. Отвечает за добавление, удаление и подсчет товаров в корзине.
 
-  Получаем товары в корзине
-  getItems(): IProduct[] {
-    return this.items;
-  }
+Поля класса:
+`private items: IProduct[]` - массив товаров, добавленных в корзину
 
-  Добавляем товар в корзину
-  addItem(product: IProduct): void {
-    this.items.push(product);
-  }
+Методы класса:
+`getItems(): IProduct[]` - возвращает массив всех товаров в корзине
+`addItem(product: IProduct): void` - добавляет переданный товар в корзину
+`removeItem(product: IProduct): void` - удаляет переданный товар из корзины (по идентификатору)
+`clear(): void` - полностью очищает корзину, удаляя все товары
+`getTotal(): number` - вычисляет и возвращает общую стоимость всех товаров в корзине
+`getCount(): number` - возвращает количество товаров в корзине
+`hasItem(id: string): boolean` - проверяет, находится ли товар с указанным идентификатором в корзине
+`getItemIds(): string[]` - возвращает массив идентификаторов всех товаров в корзине (для формирования заказа)
 
-  Удаляем товар из корзины
-  removeItem(product: IProduct): void {
-    const index = this.items.findIndex(item => item.id === product.id);
-    if(index !== -1) {
-      this.items.splice(index, 1)
-    }
-  }
+#### Класс Catalog
+Управляет каталогом товаров интернет-магазина. Отвечает за хранение и предоставление доступа к товарам.
 
-  Очистка корзины
-  clear(): void {
-    this.items = [];
-  }
+Поля класса:
+`private products: IProduct[]` - массив всех товаров в каталоге
+`private selectedProduct: IProduct | null` - товар, выбранный для детального просмотра, или null если ничего не выбрано
 
-  Получение общей стоимости товаров в корзине
-  getTotal(): number {
-    return this.items.reduce((total, item) => {
-      return total + (item.price || 0);
-    }, 0);
-  }
+Методы класса:
+`setProducts(products: IProduct[]): void` - сохраняет переданный массив товаров в каталог, заменяя существующие данные
+`getProducts(): IProduct[]` - возвращает массив всех товаров из каталога
+`getProductById(id: string): IProduct | undefined` - находит и возвращает товар по его идентификатору, или undefined если товар не найден
+`setProductDetails(product: IProduct): void` - сохраняет товар для детального просмотра
+`getProductDetails(): IProduct | null` - возвращает товар, сохраненный для детального просмотра, или null если ничего не выбрано
 
-  Получаем количество товаров в корзине
-  getCount(): number {
-    return this.items.length;
-  }
+#### Класс Buyer
+Управляет данными покупателя. Отвечает за хранение, валидацию и управление информацией о покупателе.
 
-  Проверка наличия товара в корзине по его id
-  hasItem(id: string): boolean {
-    return this.items.some(item => item.id === id);
-  }
+Поля класса:
+`private data: Partial<IBuyer>` - объект с данными покупателя (все поля необязательные)
 
-  Метод для получения ID товаров (для API)
-  getItemIds(): string[] {
-    return this.items.map(item => item.id);
-  }
-}
+Методы класса:
+`setData(data: Partial<IBuyer>): void` - сохраняет данные покупателя, объединяя с уже существующими данными
+`getData(): Partial<IBuyer>` - возвращает все данные покупателя
+`clear(): void` - полностью очищает все данные покупателя
+`validate(): ValidationErrors` - проверяет валидность данных и возвращает объект с ошибками для некорректных полей
+`isValid(): boolean` - возвращает true если все данные валидны, false если есть ошибки
 
-Объявление класса для управления каталогом товаров
-export class Catalog {
-  private products: IProduct[] = [];
+### Слой коммуникации
 
-  Выбранный товар для подробного рассмотрения
-  private selectedProduct: IProduct | null = null;
+#### Класс ApiService 
+Обеспечивает взаимодействие с API сервера. Инкапсулирует логику выполнения запросов для конкретных endpoints (получение товаров и оформление заказа).
 
-  Сохранение массива товаров в каталог
-  setProducts(products: IProduct[]): void {
-    this.products = products;
-  }
+Конструктор:
+`constructor(baseUrl: string, options: RequestInit = {})` - создает экземпляр ApiService. В конструктор передается базовый адрес сервера и опциональный объект с настройками запросов (например, заголовки). Внутри создается экземпляр класса Api с этими параметрами.
 
-  Получаем все товары из каталога
-  getProducts(): IProduct[] {
-    return this.products;
-  }
+Поля класса:
+`private api: IApi` - экземпляр класса, реализующего интерфейс IApi, используемый для выполнения HTTP-запросов.
 
-  Поиск товара по ID
-  getProductById(id: string): IProduct | undefined {
-    return this.products.find(product => product.id === id);
-  }
-
-  Сохранение товара при подробном рассмотрении
-  setProductDetails(product: IProduct): void {
-    this.selectedProduct = product;
-  }
-
-  Получение товара при подробном рассмотрении
-  getProductDetails(): IProduct | null {
-    return this.selectedProduct;
-  }
-}
-
-Объявление класса для получения данных покупателя
-export class Buyer {
-  Приватное поле data для хранения данных покупателя
-  Partial<IBuyer> означает, что все поля IBuyer являются необязательными
-  private data: Partial<IBuyer> = {};
-
-  Сохраняем данные покупателя
-  setData(data: Partial<IBuyer>): void {
-    this.data = { ...this.data, ...data };
-  }
-
-  Получаем все данные покупателя
-  getData(): Partial<IBuyer> {
-    return this.data;
-  }
-
-  Очистка данных покупателя
-  clear(): void {
-    this.data = {};
-  }
-
-  Валидация данных покупателя
-  validate(): ValidationErrors {
-    Создаем пустой объект для ошибок
-    const errors: ValidationErrors = {};
-
-    Проверка поля payment (вид оплаты)
-    if (!this.data.payment) {
-      errors.payment = 'Не выбран вид оплаты';
-    }
-
-    Проверка поля email
-    if (!this.data.email || this.data.email.trim() === '') {
-      errors.email = 'Укажите email';
-    }
-
-    Проверка поля phone
-    if (!this.data.phone || this.data.phone.trim() === '') {
-      errors.phone = 'Укажите телефон';
-    }
-
-    Проверка поля address
-    if (!this.data.address || this.data.address.trim() === '') {
-      errors.address = 'Укажите адрес';
-    }
-
-    Возвращаем объект с ошибками
-    return errors;
-  }
-
-  Проверка на валидность всех данных
-  isValid(): boolean {
-    return Object.keys(this.validate()).length === 0;
-  }
-}
-
-#### Слой коммуникации
-
-export class ApiService {
-  private api: IApi;
-
-  Конструктор принимает базовый URL и настройки запроса
-  constructor(baseUrl: string, options: RequestInit = {}) {
-    Создание экземпляра Api с переданными параметрами
-    this.api = new Api(baseUrl, options);
-  }
-
-  Получение списка товаров с сервера
-  async getProducts(): Promise<IProduct[]> {
-    Используем метод get из Api для получения товаров
-    const response: IProductsResponse = await this.api.get('/product/');
-    Возвращаем массив товаров из ответа
-    return response.items;
-  }
-
-  Отправление заказа на сервер
-  async createOrder(order: IOrder): Promise<IOrderResult> {
-    Используем метод post из Api для отправки заказа
-    const response: IOrderResult = await this.api.post('/order/', order);
-    Возвращаем ответ от сервера
-    return response;
-  }
-}
+Методы:
+`getProducts(): Promise<IProduct[]>` - выполняет GET запрос к endpoint /product/ и возвращает промис с массивом товаров (IProduct[]).
+`createOrder(order: IOrder): Promise<IOrderResult>` - выполняет POST запрос к endpoint /order/, передавая данные заказа, и возвращает промис с результатом оформления заказа (IOrderResult).
