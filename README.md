@@ -104,14 +104,14 @@ Presenter - презентер содержит основную логику п
 Интерфейсы:
 
 `export interface IApi` - Описывает контракт для класса, который будет работать с API  
-`export interface IProduct` {  - Интерфейс для описания карточки с товаром
+`export interface IProduct` {  - Интерфейс для описания карточки с товаром  
   id: string;  - id товара  
   description: string;  - описание товара
   image: string;  - картинка товара  
   title: string;  - название товара  
   category: string;  - категория товара  
   price: number | null;  - цена
-}
+}  
 `export interface IBuyer` { - Интерфейс покупателя необходим для ввода данных  
   payment: TPayment;  - тип оплаты
   email: string;  - эл. почта
@@ -125,11 +125,11 @@ Presenter - презентер содержит основную логику п
   address: string;  - адрес доставки  
   total: number;  - Общая стоимость заказа  
   items: string[];  - список ID товаров  
-}
+}  
 `export interface IOrderResult` { - Интерфейс ответа сервера при успешном заказе  
   id: string;  - id заказа
   total: number;  - общая стоимость заказа  
-}
+}  
 `export interface IProductsResponse` { - Интерфейс для ответа сервера при запросе списка товаров  
   total: number;  - общее количество товаров в каталоге
   items: IProduct[];  - массив товаров  
