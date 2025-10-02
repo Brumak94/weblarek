@@ -1,5 +1,4 @@
-import { 
-  IApi, 
+import {  
   IProduct, 
   IOrder, 
   IOrderResult, 
@@ -7,20 +6,18 @@ import {
 } from '../../types';
 import { Api } from '../base/Api';
 
-export class ApiService {
-  private api: IApi;
-
+export class ApiService extends Api {
   constructor(baseUrl: string, options: RequestInit = {}) {
-    this.api = new Api(baseUrl, options);
+    super(baseUrl, options);
   }
 
   async getProducts(): Promise<IProduct[]> {
-    const response: IProductsResponse = await this.api.get('/product/');
+    const response: IProductsResponse = await this.get('/product/');
     return response.items;
   }
 
   async createOrder(order: IOrder): Promise<IOrderResult> {
-    const response: IOrderResult = await this.api.post('/order/', order);
+    const response: IOrderResult = await this.post('/order/', order);
     return response;
   }
 }
