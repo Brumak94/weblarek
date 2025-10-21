@@ -46,7 +46,6 @@ export class CatalogCard<
   }
 
   set image(value: string) {
-    // Заменяем .svg на .png если изображение в формате svg
     const imageUrl = value.replace(/\.svg$/, '.png');
     this.setImage(this.imageElement, `${CDN_URL}${imageUrl}`);
   }

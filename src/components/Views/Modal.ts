@@ -13,7 +13,6 @@ export class Modal extends Component<IModal> {
   closeBtnElement: HTMLButtonElement;
 
   constructor(container: HTMLElement, protected eventBus: IEvents) {
-    //   constructor(container: HTMLElement, actions: IModalActions) {
     super(container);
 
     this.contentElement = ensureElement<HTMLElement>(
@@ -25,15 +24,10 @@ export class Modal extends Component<IModal> {
       this.container
     );
 
-    // this.container.classList.add('modal_active')
-
-    // this.closeBtnElement.addEventListener("click", actions.onClick);
     this.closeBtnElement.addEventListener("click", () => {
-      // this.container.classList.remove('modal_active')
       eventBus.emit(EVENTS.MODAL_CLOSE)
     });
 
-    // Закрытие по клику вне модального окна
     this.container.addEventListener("click", (e) => {
       if (e.target === this.container) {
         eventBus.emit(EVENTS.MODAL_CLOSE);
@@ -47,7 +41,6 @@ export class Modal extends Component<IModal> {
 
   set visible(value: boolean) {
     this.container.classList.toggle("modal_active", value);
-    // Блокировка скролла страницы при открытом модальном окне
     document.body.style.overflow = value ? "hidden" : "";
   }
 }

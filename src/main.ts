@@ -22,7 +22,6 @@ const catalog = new Catalog(eventBus);
 const cart = new Cart(eventBus);
 const buyer = new Buyer(eventBus);
 
-// Вспомогательная функция для создания элементов корзины
 function createBasketItems(products: IProduct[]): HTMLElement[] {
   return products.map((product, index) =>
     new CardBasket(cloneTemplate("#card-basket"), {
@@ -33,7 +32,6 @@ function createBasketItems(products: IProduct[]): HTMLElement[] {
   );
 }
 
-// Вспомогательная функция для определения состояния кнопки товара
 function getProductButtonState(product: IProduct, isInCart: boolean): { buttonText: string; buttonDisabled: boolean } {
   if (!product.price) {
     return { buttonText: "Недоступно", buttonDisabled: true };
@@ -69,7 +67,6 @@ const contactFormComponent = new ContactForm(
 
 const successComponent = new Success(cloneTemplate("#success"), eventBus);
 
-// Загружаем товары с сервера
 apiService
   .getProducts()
   .then((products) => {
@@ -130,7 +127,7 @@ eventBus.on(EVENTS.PRODUCT_ADD, () => {
   } else {
     cart.addItem(product);
   }
-  // Закрываем модальное окно после добавления/удаления товара
+
   modalComponent.render({ visible: false });
 });
 
@@ -241,7 +238,6 @@ eventBus.on(EVENTS.CONTACT_FORM_ACCEPT, () => {
     })
     .catch((error) => {
       console.error("Ошибка при оформлении заказа:", error);
-      // Можно добавить отображение ошибки пользователю
     });
 });
 

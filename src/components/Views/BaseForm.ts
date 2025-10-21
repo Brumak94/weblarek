@@ -34,7 +34,6 @@ export abstract class BaseForm<T extends IBaseForm = IBaseForm> extends Componen
     this.inputElements.forEach((input) => {
       input.addEventListener("input", (e) => {
         const target = e.target as HTMLInputElement;
-
         eventBus.emit(EVENTS.FORM_CHANGED, { [target.name]: target.value });
       });
     });

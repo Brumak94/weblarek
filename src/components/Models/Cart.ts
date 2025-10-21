@@ -10,7 +10,6 @@ export class Cart extends BaseModel {
   }
 
   addItem(product: IProduct): void {
-    // Не добавляем товары с price = null
     if (product.price === null || product.price === undefined) {
       return;
     }
