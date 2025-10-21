@@ -1,6 +1,8 @@
 import { IProduct } from '../../types'; 
+import { EVENTS } from '../../utils/constants';
+import { BaseModel } from './BaseModel';
 
-export class Cart {
+export class Cart extends BaseModel {
   private items: IProduct[] = [];
 
   getItems(): IProduct[] {
@@ -8,7 +10,12 @@ export class Cart {
   }
 
   addItem(product: IProduct): void {
+    // Не добавляем товары с price = null
+    if (product.price === null || product.price === undefined) {
+      return;
+    }
     this.items.push(product);
+    this.eventBus.emit(EVENTS.CART_CHANGED)
   }
 
   removeItem(product: IProduct): void {
@@ -16,10 +23,12 @@ export class Cart {
     if(index !== -1) {
       this.items.splice(index, 1)
     }
+    this.eventBus.emit(EVENTS.CART_CHANGED)
   }
 
   clear(): void {
     this.items = [];
+    this.eventBus.emit(EVENTS.CART_CHANGED)
   }
 
   getTotal(): number {
