@@ -197,3 +197,189 @@ Presenter - презентер содержит основную логику п
 Методы:  
 `getProducts(): Promise<IProduct[]>` - выполняет GET запрос к endpoint /product/ и возвращает промис с массивом товаров (IProduct[]).  
 `createOrder(order: IOrder): Promise<IOrderResult>` - выполняет POST запрос к endpoint /order/, передавая данные заказа, и возвращает промис с результатом оформления заказа (IOrderResult).
+
+### Слой представления (View)
+
+Все компоненты представления наследуются от базового класса Component и отвечают за отображение данных на странице.
+
+#### Класс Modal
+Управляет модальным окном. Отвечает за отображение и скрытие модального окна, а также за его содержимое.
+
+Конструктор:  
+`constructor(container: HTMLElement, eventBus: IEvents)` - принимает корневой DOM-элемент модального окна и экземпляр EventEmitter для управления событиями.
+
+Поля класса:  
+`contentElement: HTMLElement` - элемент для размещения содержимого модального окна  
+`closeBtnElement: HTMLButtonElement` - кнопка закрытия модального окна  
+
+Методы класса (сеттеры):  
+`set content(value: HTMLElement)` - устанавливает содержимое модального окна  
+`set visible(value: boolean)` - показывает или скрывает модальное окно, управляет блокировкой скролла страницы  
+
+#### Класс Header
+Управляет шапкой страницы с логотипом и иконкой корзины.
+
+Конструктор:  
+`constructor(container: HTMLElement, eventBus: IEvents)` - принимает корневой DOM-элемент шапки и экземпляр EventEmitter.
+
+Поля класса:  
+`basketButton: HTMLButtonElement` - кнопка открытия корзины  
+`counterElement: HTMLElement` - элемент счётчика товаров в корзине  
+
+Методы класса (сеттеры):  
+`set counter(value: number)` - устанавливает значение счётчика товаров в корзине  
+
+#### Класс Gallery
+Управляет галереей товаров на главной странице.
+
+Конструктор:  
+`constructor(container: HTMLElement)` - принимает корневой DOM-элемент галереи.
+
+Поля класса:  
+`catalogElement: HTMLElement` - элемент для размещения карточек товаров  
+
+Методы класса (сеттеры):  
+`set catalog(items: HTMLElement[])` - устанавливает массив элементов карточек товаров для отображения  
+
+#### Класс Card
+Базовый класс для всех типов карточек товаров. Является дженериком, принимающим тип данных, расширяющий интерфейс ICard.
+
+Конструктор:  
+`constructor(container: HTMLElement)` - принимает корневой DOM-элемент карточки.
+
+Поля класса:  
+`titleElement: HTMLElement` - элемент заголовка товара  
+`priceElement: HTMLElement` - элемент цены товара  
+
+Методы класса (сеттеры):  
+`set title(value: string)` - устанавливает название товара  
+`set price(value: number | null)` - устанавливает цену товара, отображает "Бесценно" для товаров без цены  
+
+#### Класс CatalogCard
+Расширяет класс Card. Отображает карточку товара в каталоге с изображением и категорией.
+
+Конструктор:  
+`constructor(container: HTMLElement, actions?: ICatalogCardActions)` - принимает корневой DOM-элемент и опциональный объект с обработчиком клика.
+
+Поля класса:  
+`categoryElement: HTMLElement` - элемент категории товара  
+`imageElement: HTMLImageElement` - элемент изображения товара  
+
+Методы класса (сеттеры):  
+`set category(value: keyof typeof categoryMap)` - устанавливает категорию товара и применяет соответствующий CSS-класс  
+`set image(value: string)` - устанавливает изображение товара  
+
+#### Класс CardPreview
+Расширяет класс CatalogCard. Отображает детальную информацию о товаре в модальном окне.
+
+Конструктор:  
+`constructor(container: HTMLElement, eventBus: IEvents)` - принимает корневой DOM-элемент и экземпляр EventEmitter.
+
+Поля класса:  
+`descriptionElement: HTMLElement` - элемент описания товара  
+`buttonElement: HTMLButtonElement` - кнопка добавления/удаления товара из корзины  
+
+Методы класса (сеттеры):  
+`set description(value: string)` - устанавливает описание товара  
+`set buttonText(value: string)` - устанавливает текст кнопки ("Купить", "Удалить из корзины" или "Недоступно")  
+`set buttonDisabled(value: boolean)` - управляет доступностью кнопки  
+
+#### Класс CardBasket
+Расширяет класс Card. Отображает карточку товара в корзине с порядковым номером и кнопкой удаления.
+
+Конструктор:  
+`constructor(container: HTMLElement, actions: ICardBasketActions)` - принимает корневой DOM-элемент и объект с обработчиком удаления.
+
+Поля класса:  
+`indexElement: HTMLElement` - элемент порядкового номера товара  
+`removeBtnElement: HTMLButtonElement` - кнопка удаления товара из корзины  
+
+Методы класса (сеттеры):  
+`set index(value: number)` - устанавливает порядковый номер товара в корзине  
+
+#### Класс Basket
+Управляет отображением корзины покупок.
+
+Конструктор:  
+`constructor(container: HTMLElement, eventBus: IEvents)` - принимает корневой DOM-элемент корзины и экземпляр EventEmitter.
+
+Поля класса:  
+`listElement: HTMLElement` - элемент списка товаров  
+`totalElement: HTMLElement` - элемент общей стоимости  
+`buttonElement: HTMLButtonElement` - кнопка оформления заказа  
+
+Методы класса (сеттеры):  
+`set list(value: HTMLElement[])` - устанавливает список товаров, отображает "Корзина пуста" если список пуст, управляет доступностью кнопки оформления  
+`set total(value: number)` - устанавливает общую стоимость товаров  
+
+#### Класс BaseForm
+Абстрактный базовый класс для всех форм. Является дженериком, принимающим тип данных, расширяющий интерфейс IBaseForm.
+
+Конструктор:  
+`constructor(container: HTMLElement, eventBus: IEvents)` - принимает корневой DOM-элемент формы и экземпляр EventEmitter.
+
+Поля класса:  
+`errorsElement: HTMLElement` - элемент для отображения ошибок валидации  
+`inputElements: HTMLInputElement[]` - массив всех полей ввода формы  
+`buttonElement: HTMLButtonElement` - кнопка отправки формы  
+
+Методы класса (сеттеры):  
+`set errors(value: string)` - устанавливает текст ошибки валидации  
+`set buttonDisabled(value: boolean)` - управляет доступностью кнопки отправки формы  
+
+#### Класс OrderForm
+Расширяет класс BaseForm. Управляет первым шагом оформления заказа (выбор способа оплаты и адреса доставки).
+
+Конструктор:  
+`constructor(container: HTMLElement, eventBus: IEvents)` - принимает корневой DOM-элемент формы и экземпляр EventEmitter.
+
+Поля класса:  
+`buttonElement: HTMLButtonElement` - кнопка перехода к следующему шагу  
+`cardButton: HTMLButtonElement` - кнопка выбора оплаты картой  
+`cashButton: HTMLButtonElement` - кнопка выбора оплаты наличными  
+
+Методы класса (сеттеры):  
+`set payment(value: TPayment)` - устанавливает выбранный способ оплаты и обновляет визуальное состояние кнопок  
+
+#### Класс ContactForm
+Расширяет класс BaseForm. Управляет вторым шагом оформления заказа (ввод email и телефона).
+
+Конструктор:  
+`constructor(container: HTMLElement, eventBus: IEvents)` - принимает корневой DOM-элемент формы и экземпляр EventEmitter.
+
+Поля класса:  
+`buttonElement: HTMLButtonElement` - кнопка оформления заказа  
+
+#### Класс Success
+Отображает сообщение об успешном оформлении заказа.
+
+Конструктор:  
+`constructor(container: HTMLElement, eventBus: IEvents)` - принимает корневой DOM-элемент и экземпляр EventEmitter.
+
+Поля класса:  
+`descriptionElement: HTMLElement` - элемент описания с информацией о списанных синапсах  
+`buttonElement: HTMLButtonElement` - кнопка закрытия окна  
+
+Методы класса (сеттеры):  
+`set count(value: number)` - устанавливает количество списанных синапсов  
+
+### Presenter (Главный файл приложения)
+
+Файл `main.ts` выполняет роль Presenter в архитектуре MVP. Он связывает модели данных (Models) и компоненты представления (Views) через систему событий (EventEmitter).
+
+Основные обязанности Presenter:
+- Инициализация всех компонентов приложения (моделей и представлений)
+- Настройка обработчиков событий для связи между компонентами
+- Управление потоком данных между Models и Views
+- Обработка пользовательских действий и обновление состояния приложения
+- Координация взаимодействия с API через ApiService
+
+Вспомогательные функции в Presenter:
+- `createBasketItems(products: IProduct[]): HTMLElement[]` - создаёт массив элементов карточек для корзины
+- `getProductButtonState(product: IProduct, isInCart: boolean)` - определяет состояние кнопки товара (текст и доступность)
+
+Паттерн MVP обеспечивает:
+- Слабую связанность между компонентами
+- Легкость тестирования отдельных частей приложения
+- Простоту поддержки и расширения функциональности
+- Четкое разделение ответственности между слоями

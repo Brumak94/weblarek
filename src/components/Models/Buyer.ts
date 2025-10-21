@@ -1,10 +1,21 @@
 import { IBuyer, ValidationErrors } from '../../types';
+import { EVENTS } from '../../utils/constants';
+import { BaseModel } from './BaseModel';
 
-export class Buyer {
+export class Buyer extends BaseModel {
   private data: Partial<IBuyer> = {};
 
   setData(data: Partial<IBuyer>): void {
+    const changed: Partial<IBuyer> = {};
+    
+    (Object.keys(data) as Array<keyof IBuyer>).forEach((key) => {
+      if (data[key] !== this.data[key]) {
+        changed[key] = data[key] as never;
+      }
+    });
+    
     this.data = { ...this.data, ...data };
+    this.eventBus.emit(EVENTS.BUYER_DATA_CHANGED, changed);
   }
 
   getData(): Partial<IBuyer> {
@@ -12,7 +23,9 @@ export class Buyer {
   }
 
   clear(): void {
+    const prev = this.data
     this.data = {};
+    this.eventBus.emit(EVENTS.BUYER_DATA_CHANGED, prev)
   }
 
   validate(): ValidationErrors {
